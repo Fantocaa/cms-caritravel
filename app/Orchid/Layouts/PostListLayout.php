@@ -33,8 +33,19 @@ class PostListLayout extends Table
                         ->route('platform.post.edit', $post);
                 }),
 
-            TD::make('created_at', 'Created'),
-            TD::make('updated_at', 'Last edit'),
+            TD::make('image', 'Image')
+                ->render(function (Post $post) {
+                    $imageUrl = $post->getImageUrlAttribute();
+
+                    return $imageUrl ? "<img src='{$imageUrl}' alt='{$post->title}' style='width: 50px; height: 50px;'>" : 'No Image';
+                })
+                ->width('100px'), // Optional: Set a fixed width for the column
+
+            // TD::make('created_at', 'Created'),
+            // TD::make('updated_at', 'Last edit'),
+
+
+
         ];
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Orchid\Attachment\Attachable;
+use Orchid\Attachment\Models\Attachment;
 use Orchid\Filters\Filterable;
 use Orchid\Screen\AsSource;
 
@@ -21,6 +22,24 @@ class Post extends Model
     public function city()
     {
         return $this->belongsTo(cities::class, 'cities');
+    }
+
+    // public function images()
+    // {
+    //     return $this->hasMany(Attachment::class)->where('group', 'images');
+    // }
+
+    public function getImageUrlAttribute()
+    {
+        // Assuming the first attachment is the image you want to display
+        $image = $this->Attachment->first();
+
+        return $image ? $image->url : null;
+    }
+
+    public function attachments()
+    {
+        return $this->morphToMany(Attachment::class, 'attachmentable');
     }
 
     public function setDateAttribute($value)
@@ -50,5 +69,6 @@ class Post extends Model
         'description',
         'body',
         'author',
+        'price',
     ];
 }

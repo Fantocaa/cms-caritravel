@@ -32,7 +32,7 @@ class PlatformScreen extends Screen
      */
     public function description(): ?string
     {
-        return 'Welcome to your Cari Travel application.';
+        return 'Welcome to Cari Travel application.';
     }
 
     /**
