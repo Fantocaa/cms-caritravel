@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Fields\DateRange;
+use Orchid\Screen\Fields\Group;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Quill;
 // use Orchid\Screen\Fields\Upload;
@@ -40,7 +41,6 @@ class PostEditScreen extends Screen
 
         return [
             'post' => $post,
-            // 'images' => $post->attachment()->where('group', 'images')->get(),
         ];
     }
 
@@ -50,12 +50,12 @@ class PostEditScreen extends Screen
     public function name(): ?string
     {
         // return 'PostEditScreen';
-        return $this->post->exists ? 'Edit post' : 'Creating a new post';
+        return $this->post->exists ? 'Edit post' : 'Creating a new Package';
     }
 
     public function description(): ?string
     {
-        return 'Blog posts';
+        return 'Travel Package';
     }
 
     /**
@@ -91,110 +91,123 @@ class PostEditScreen extends Screen
     public function layout(): iterable
     {
         return [
-            Layout::rows([
+            Layout::columns([
+                Layout::rows([
 
-                Relation::make('post.countries')
-                    ->title('Negara')
-                    ->placeholder('Enter Negara')
-                    ->fromModel(countries::class, 'name'),
+                    Relation::make('post.country_ids')
+                        ->fromModel(countries::class, 'name')
+                        ->multiple()
+                        ->title('Negara')
+                        ->placeholder('Enter Negara'),
 
-                Relation::make('post.cities')
-                    ->title('Kota')
-                    ->placeholder('Enter Kota')
-                    ->fromModel(cities::class, 'name')
-                    ->dependsOn('post.countries'),
+                    Relation::make('post.city_ids')
+                        ->fromModel(cities::class, 'name')
+                        ->multiple()
+                        ->title('Kota')
+                        ->placeholder('Enter Kota')
+                        ->dependsOn('post.country_ids'),
 
-                Input::make('post.traveler')
-                    ->title('Traveler')
-                    ->placeholder('Jumlah Traveler')
-                    ->type('number'),
+                    Input::make('post.traveler')
+                        ->title('Traveler')
+                        ->placeholder('Jumlah Traveler')
+                        ->type('number'),
 
-                DateRange::make('post.date')
-                    ->title('Jadwal Perjalanan')
-                    ->placeholder('Pilih Rentang Tanggal'),
+                    DateRange::make('post.date')
+                        ->title('Jadwal Perjalanan')
+                        ->placeholder('Pilih Rentang Tanggal'),
 
-                Input::make('post.duration')
-                    ->title('Duration')
-                    ->type('number')
-                    ->placeholder('Enter Duration'),
+                    Group::make([
+                        Input::make('post.duration')
+                            ->title('Durasi Hari')
+                            ->type('number')
+                            ->placeholder('Enter Duration'),
 
-                Input::make('post.title')
-                    ->title('Title')
-                    ->placeholder('Attractive but mysterious title')
-                    ->help('Specify a short descriptive title for this post.'),
+                        Input::make('post.duration_night')
+                            ->title('Durasi Malam')
+                            ->type('number')
+                            ->placeholder('Enter Duration'),
+                    ]),
 
-                TextArea::make('post.general_info')
-                    ->title('Informasi Umum')
-                    ->rows(4)
-                    ->maxlength(256)
-                    ->placeholder('Informasi Umum terkait Product Travel'),
+                    Relation::make('post.author')
+                        ->title('Sales')
+                        ->fromModel(User::class, 'name'),
 
-                Quill::make('post.travel_schedule')
-                    ->title('Jadwal Perjalanan')
-                    ->placeholder('Informasi Umum terkait Product Travel'),
+                    Input::make('post.price')
+                        ->title('Harga')
+                        ->type('number'),
 
-                TextArea::make('post.additional_info')
-                    ->title('Informasi Tambahan')
-                    ->rows(4)
-                    ->maxlength(255)
-                    ->placeholder('Informasi Umum terkait Product Travel'),
+                    Upload::make('post.attachment')
+                        ->title('Image')
+                        ->targetId()
+                        ->placeholder('Masukkan Foto'),
 
-                Relation::make('post.author')
-                    ->title('Author')
-                    ->fromModel(User::class, 'name'),
+                ])->title('Informasi Paket'),
 
-                Input::make('post.price')
-                    ->title('Harga')
-                    ->type('number'),
+                Layout::rows([
+                    Input::make('post.title')
+                        ->title('Title')
+                        ->placeholder('Attractive but mysterious title')
+                        ->help('Specify a short descriptive title for this post.'),
 
-                Upload::make('post.attachment')
-                    ->title('Image')
-                    ->targetId()
-                    ->placeholder('Masukkan Foto'),
+                    TextArea::make('post.general_info')
+                        ->title('Informasi Umum')
+                        ->rows(8)
+                        ->maxlength(255)
+                        ->placeholder('Informasi Umum terkait Product Travel'),
 
-                // Quill::make('post.body')
-                //     ->title('Main text'),
+                    Quill::make('post.travel_schedule')
+                        ->title('Jadwal Perjalanan')
+                        ->placeholder('Informasi Umum terkait Product Travel'),
+
+                    TextArea::make('post.additional_info')
+                        ->title('Informasi Tambahan')
+                        ->rows(8)
+                        ->maxlength(255)
+                        ->placeholder('Informasi Umum terkait Product Travel'),
+
+                ])->title('Konten Paket'),
             ]),
         ];
     }
 
     public function createOrUpdate(Request $request)
     {
-        // dd($request->all());
-        $validatedData = $request->validate(
-            [
-                'post.countries' => 'required',
-                'post.cities' => 'required',
-                'post.traveler' => 'required|numeric',
-                'post.date' => 'required|array',
-                'post.date.start' => 'required|date',
-                'post.date.end' => 'required|date|after_or_equal:post.date.start',
-                'post.duration' => 'required',
-                'post.title' => 'required|max:255',
-                // 'post.description' => 'required|max:200',
-                'post.author' => 'required',
-                // 'post.body' => 'required',
+        $validatedData = $request->validate([
+            'post.country_ids' => 'required',
+            'post.city_ids' => 'required',
+            'post.traveler' => 'required|numeric',
+            'post.date' => 'required|array',
+            'post.date.start' => 'required|date',
+            'post.date.end' => 'required|date|after_or_equal:post.date.start',
+            'post.duration' => 'required',
+            'post.duration_night' => 'required',
+            'post.title' => 'required|max:255',
+            'post.author' => 'required',
+        ], [
+            'post.country_ids.required' => 'Negara tidak boleh kosong',
+            'post.city_ids.required' => 'Kota tidak boleh kosong',
+            'post.traveler.required' => 'Traveler tidak boleh kosong',
+            'post.date.required' => 'Jadwal Perjalanan tidak boleh kosong',
+            'post.date.start.required' => 'Tanggal mulai tidak boleh kosong',
+            'post.date.end.required' => 'Tanggal akhir tidak boleh kosong',
+            'post.duration.required' => 'Durasi Hari tidak boleh kosong',
+            'post.duration_night.required' => 'Durasi Malam tidak boleh kosong',
+            'post.title.required' => 'Judul tidak boleh kosong',
+            'post.author.required' => 'Penulis tidak boleh kosong',
+        ]);
 
-            ],
-            [
-                'post.countries.required' => 'Negara tidak boleh kosong',
-                'post.cities.required' => 'Kota tidak boleh kosong',
-                'post.traveler.required' => 'Traveler tidak boleh kosong',
-                'post.date.required' => 'Jadwal Perjalanan tidak boleh kosong',
-                'post.date.start.required' => 'Tanggal mulai tidak boleh kosong',
-                'post.date.end.required' => 'Tanggal akhir tidak boleh kosong',
-                'post.duration.required' => 'Durasi tidak boleh kosong',
-                'post.title.required' => 'Judul tidak boleh kosong',
-                // 'post.description.required' => 'Deskripsi tidak boleh kosong',
-                'post.author.required' => 'Penulis tidak boleh kosong',
-                // 'post.body.required' => 'Isi post tidak boleh kosong',
-            ]
+        // Ambil ID negara dan kota dari request
+        $countryIds = $request->input('post.country_ids');
+        $cityIds = $request->input('post.city_ids');
 
-        );
+        // Isi model post dengan data dari request termasuk ID negara dan kota
+        $postData = $request->get('post');
+        $postData['countries'] = $countryIds;
+        $postData['cities'] = $cityIds;
 
-        $this->post->fill($request->get('post'))->save();
+        $this->post->fill($postData)->save();
 
-        // $this->post->attachment()->syncWithoutDetaching($request->input('post.images', []));
+        // Sync attachment
         $this->post->attachment()->syncWithoutDetaching(
             $request->input('post.attachment', [])
         );
@@ -203,6 +216,71 @@ class PostEditScreen extends Screen
 
         return redirect()->route('platform.post.list');
     }
+
+    public function postData()
+    {
+        $data = Post::with(['attachment'])->get(); // 'country' and 'city' relations are not needed here as we are fetching IDs
+
+        $data->transform(function ($post) {
+            // Decode JSON strings to arrays
+            $cityIds = is_string($post->cities) ? json_decode($post->cities, true) : $post->cities;
+            $countryIds = is_string($post->countries) ? json_decode($post->countries, true) : $post->countries;
+
+            // Mendapatkan nama-nama kota berdasarkan ID yang disimpan dalam array
+            $cityNames = collect($cityIds)->map(function ($cityId) {
+                $city = cities::find($cityId);
+                return $city ? $city->name : null;
+            })->filter();
+
+            // Mendapatkan nama-nama negara berdasarkan ID yang disimpan dalam array
+            $countryNames = collect($countryIds)->map(function ($countryId) {
+                $country = countries::find($countryId);
+                return $country ? $country->name : null;
+            })->filter();
+
+            $attachment = $post->attachment->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'url' => $attachment->url,
+                ];
+            });
+
+            $post->start_date = date('d F Y', strtotime($post->start_date));
+            $post->end_date = date('d F Y', strtotime($post->end_date));
+
+            $author = User::find($post->author);
+            $whatsappLink = $author ? "https://api.whatsapp.com/send?phone=" . preg_replace('/[^0-9]/', '', $author->phone) : null;
+
+            $formattedPrice = number_format($post->price, 0, ',', '.');
+
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'cities' => $cityNames->implode(', '),
+                'city_ids' => $cityIds,
+                'countries' => $countryNames->implode(', '),
+                'country_ids' => $countryIds,
+                'traveler' => $post->traveler,
+                'duration' => $post->duration,
+                'start_date' => $post->start_date,
+                'end_date' => $post->end_date,
+                'whatsapp_link' => $whatsappLink,
+                'price' => $formattedPrice,
+                'attachment' => $attachment,
+                'general_info' => $post->general_info,
+                'travel_schedule' => $post->travel_schedule,
+                'additional_info' => $post->additional_info,
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    // public function postDatadb()
+    // {
+    //     $data = Post::all();
+    //     return response()->json($data);
+    // }
 
     /**
      * @return \Illuminate\Http\RedirectResponse
@@ -215,40 +293,5 @@ class PostEditScreen extends Screen
         Alert::info('You have successfully deleted the post.');
 
         return redirect()->route('platform.post.list');
-    }
-
-    public function postData()
-    {
-        $data = Post::with(['attachment', 'country', 'city'])->get();
-        $data->transform(function ($post) {
-            $attachments = $post->attachment->map(function ($attachment) {
-                return [
-                    'id' => $attachment->id,
-                    'url' => $attachment->url,
-                ];
-            });
-
-            // Mengubah format tanggal dengan nama bulan dalam bahasa Inggris
-            $post->start_date = date('d F Y', strtotime($post->start_date)); // Contoh: 21 May 2024
-            $post->end_date = date('d F Y', strtotime($post->end_date)); // Contoh: 23 May 2024
-
-            return [
-                'id' => $post->id,
-                'title' => $post->title,
-                'cities' => $post->city->name,
-                'countries' => $post->country->name,
-                'traveler' => $post->traveler,
-                'duration' => $post->duration,
-                'start_date' => $post->start_date,
-                'end_date' => $post->end_date,
-                'description' => $post->description,
-                'body' => $post->body,
-                'author' => $post->author,
-                'price' => $post->price,
-                'attachment' => $attachments,
-            ];
-        });
-
-        return response()->json($data);
     }
 }

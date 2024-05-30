@@ -14,6 +14,35 @@ class Post extends Model
 {
     use AsSource, Attachable, Filterable, HasFactory, SoftDeletes;
 
+    protected $casts = [
+        'countries' => 'array',
+        'cities' => 'array',
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
+    // Accessors & Mutators for country_ids and city_ids
+    public function getCountryIdsAttribute()
+    {
+        return json_decode($this->attributes['countries'], true);
+    }
+
+    public function setCountryIdsAttribute($value)
+    {
+        $this->attributes['countries'] = json_encode($value);
+    }
+
+    public function getCityIdsAttribute()
+    {
+        return json_decode($this->attributes['cities'], true);
+    }
+
+    public function setCityIdsAttribute($value)
+    {
+        $this->attributes['cities'] = json_encode($value);
+    }
+
+    // Old
     public function country()
     {
         return $this->belongsTo(countries::class, 'countries');
@@ -23,11 +52,6 @@ class Post extends Model
     {
         return $this->belongsTo(cities::class, 'cities');
     }
-
-    // public function images()
-    // {
-    //     return $this->hasMany(Attachment::class)->where('group', 'images');
-    // }
 
     public function getImageUrlAttribute()
     {
@@ -61,13 +85,12 @@ class Post extends Model
         'cities',
         'traveler',
         'duration',
-        'date',
+        'start_date',
+        'end_date',
         'general_info',
         'travel_schedule',
         'additional_info',
         'title',
-        'description',
-        'body',
         'author',
         'price',
     ];

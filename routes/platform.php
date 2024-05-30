@@ -101,7 +101,7 @@ Route::screen('posts', PostListScreen::class)
     ->name('platform.post.list')
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
-        ->push('Blog Post'));
+        ->push('Travel Package'));
 
 Route::screen('/examples/form/fields', ExampleFieldsScreen::class)->name('platform.example.fields');
 Route::screen('/examples/form/advanced', ExampleFieldsAdvancedScreen::class)->name('platform.example.advanced');

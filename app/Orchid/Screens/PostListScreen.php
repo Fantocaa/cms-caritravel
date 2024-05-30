@@ -27,7 +27,7 @@ class PostListScreen extends Screen
     public function name(): ?string
     {
         // return 'PostListScreen';
-        return 'Blog post';
+        return 'Travel Package';
     }
 
     /**
@@ -37,7 +37,7 @@ class PostListScreen extends Screen
      */
     public function description(): ?string
     {
-        return 'All blog posts';
+        return 'All Travel Package';
     }
 
     public function commandBar(): iterable

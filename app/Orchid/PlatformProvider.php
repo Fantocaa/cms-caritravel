@@ -61,9 +61,11 @@ class PlatformProvider extends OrchidServiceProvider
             //     ->icon('bs.card-text')
             //     ->route('platform.example.cards'),
 
-            Menu::make('Post')
+            Menu::make('Travel Package')
                 ->icon('bs.file-earmark-post')
                 ->route('platform.post.list')
+                ->title('Post Management')
+                ->active('platform.post.list')
                 ->divider(),
 
             Menu::make(__('Users'))

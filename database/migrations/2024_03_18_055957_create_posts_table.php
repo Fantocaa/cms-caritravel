@@ -17,14 +17,14 @@ return new class extends Migration
             $table->string('cities')->nullable();
             $table->string('traveler')->nullable();
             $table->string('duration')->nullable();
+            $table->string('duration_night')->nullable();
             $table->date('start_date')->nullable(); // new column for start date
             $table->date('end_date')->nullable(); // new column for end date
             $table->mediumText('general_info')->nullable();
             $table->mediumText('travel_schedule')->nullable();
             $table->mediumText('additional_info')->nullable();
             $table->string('title');
-            $table->string('description');
-            $table->text('body');
+            $table->string('price')->nullable();
             $table->bigInteger('author');
             $table->softDeletes();
             $table->timestamps();

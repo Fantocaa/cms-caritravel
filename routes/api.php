@@ -20,3 +20,4 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::get('/postdata', [PostEditScreen::class, "postData"]);
+// Route::get('/postdatadb', [PostEditScreen::class, "postDatadb"]);
