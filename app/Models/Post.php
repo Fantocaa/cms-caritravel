@@ -22,9 +22,14 @@ class Post extends Model
     ];
 
     // Accessors & Mutators for country_ids and city_ids
+    // public function getCountryIdsAttribute()
+    // {
+    //     return json_decode($this->attributes['countries'], true);
+    // }
+
     public function getCountryIdsAttribute()
     {
-        return json_decode($this->attributes['countries'], true);
+        return isset($this->attributes['countries']) ? json_decode($this->attributes['countries'], true) : [];
     }
 
     public function setCountryIdsAttribute($value)
@@ -32,9 +37,14 @@ class Post extends Model
         $this->attributes['countries'] = json_encode($value);
     }
 
+    // public function getCityIdsAttribute()
+    // {
+    //     return json_decode($this->attributes['cities'], true);
+    // }
+
     public function getCityIdsAttribute()
     {
-        return json_decode($this->attributes['cities'], true);
+        return isset($this->attributes['cities']) ? json_decode($this->attributes['cities'], true) : [];
     }
 
     public function setCityIdsAttribute($value)
