@@ -260,6 +260,7 @@ class PostEditScreen extends Screen
                 'country_ids' => $countryIds,
                 'traveler' => $post->traveler,
                 'duration' => $post->duration,
+                'duration_night' => $post->duration_night,
                 'start_date' => $formattedStartDate,
                 'end_date' => $formattedEndDate,
                 'whatsapp_link' => $whatsappLink,
