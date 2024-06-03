@@ -172,6 +172,7 @@ class PostEditScreen extends Screen
 
     public function createOrUpdate(Request $request)
     {
+        // dd($request)->all();
         $validatedData = $request->validate([
             'post.country_ids' => 'required',
             'post.city_ids' => 'required',
@@ -219,20 +220,17 @@ class PostEditScreen extends Screen
 
     public function postData()
     {
-        $data = Post::with(['attachment'])->get(); // 'country' and 'city' relations are not needed here as we are fetching IDs
+        $data = Post::with(['attachment'])->get();
 
-        $data->transform(function ($post) {
-            // Decode JSON strings to arrays
+        $transformedData = $data->map(function ($post) {
             $cityIds = is_string($post->cities) ? json_decode($post->cities, true) : $post->cities;
             $countryIds = is_string($post->countries) ? json_decode($post->countries, true) : $post->countries;
 
-            // Mendapatkan nama-nama kota berdasarkan ID yang disimpan dalam array
             $cityNames = collect($cityIds)->map(function ($cityId) {
                 $city = cities::find($cityId);
                 return $city ? $city->name : null;
             })->filter();
 
-            // Mendapatkan nama-nama negara berdasarkan ID yang disimpan dalam array
             $countryNames = collect($countryIds)->map(function ($countryId) {
                 $country = countries::find($countryId);
                 return $country ? $country->name : null;
@@ -245,8 +243,8 @@ class PostEditScreen extends Screen
                 ];
             });
 
-            $post->start_date = date('d F Y', strtotime($post->start_date));
-            $post->end_date = date('d F Y', strtotime($post->end_date));
+            $formattedStartDate = date('d F Y', strtotime($post->start_date));
+            $formattedEndDate = date('d F Y', strtotime($post->end_date));
 
             $author = User::find($post->author);
             $whatsappLink = $author ? "https://api.whatsapp.com/send?phone=" . preg_replace('/[^0-9]/', '', $author->phone) : null;
@@ -262,8 +260,8 @@ class PostEditScreen extends Screen
                 'country_ids' => $countryIds,
                 'traveler' => $post->traveler,
                 'duration' => $post->duration,
-                'start_date' => $post->start_date,
-                'end_date' => $post->end_date,
+                'start_date' => $formattedStartDate,
+                'end_date' => $formattedEndDate,
                 'whatsapp_link' => $whatsappLink,
                 'price' => $formattedPrice,
                 'attachment' => $attachment,
@@ -273,8 +271,9 @@ class PostEditScreen extends Screen
             ];
         });
 
-        return response()->json($data);
+        return response()->json($transformedData);
     }
+
 
     // public function postDatadb()
     // {
