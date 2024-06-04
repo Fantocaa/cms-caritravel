@@ -95,6 +95,7 @@ class Post extends Model
         'cities',
         'traveler',
         'duration',
+        'duration_night',
         // 'start_date',
         // 'end_date',
         'date',
