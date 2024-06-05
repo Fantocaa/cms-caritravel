@@ -156,7 +156,7 @@ class PostEditScreen extends Screen
                         ->placeholder('Informasi Umum terkait Product Travel'),
 
                     Quill::make('post.travel_schedule')
-                        ->title('Jadwal Perjalanan')
+                        ->title('Informasi Paket')
                         ->placeholder('Informasi Umum terkait Product Travel'),
 
                     TextArea::make('post.additional_info')
